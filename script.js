@@ -1,5 +1,5 @@
 function converToBinary(data) {
-    // Jesli data jest adresem ip podziel ja i konwertuj
+    // Jesli data jest adresem ip podziel je i konwertuj
     if (verifyIpAddress(data)) {
         const array = data.split(".");
         let converted = "";
@@ -19,7 +19,7 @@ function converToBinary(data) {
         });
         return converted.slice(0, -1);
     }
-    // Jesli data jest liczbą
+    // Jesli data jest liczbą to ja konwertuj
     else if (typeof data == "number") {
         let binary = "";
 
@@ -49,7 +49,7 @@ function verifyIpAddress(ip) {
     return new RegExp("^[0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}$").test(ip);
 }
 
-// Sprawdzenie i zwrócenie klasy adresu ip
+// Sprawdzenie i zwrocenie klasy adresu ip
 function returnIpClass(ipAddress) {
     let ip = ipAddress.split(".");
 
@@ -70,6 +70,7 @@ function returnIpClass(ipAddress) {
     }
 }
 
+// Zwrocenie maski w postaci np. 24
 function returnShortMask(mask) {
     switch (mask) {
         case "255.0.0.0":
@@ -183,6 +184,9 @@ function createHistory () {
             table.setAttribute("id", "history" + i);
             historyContent.appendChild(table);
 
+            // Ten kod jest tak bardzo zly, ze jak go widze to mi sie
+            // niedobrze robi ale dziala wiec go zostawiam a nie mam
+            // wiecej czasu.
             let row1 = table.insertRow(0);
             let cell1row1 = row1.insertCell(0);
             let cell2row1 = row1.insertCell(1);
@@ -255,8 +259,6 @@ function createHistory () {
             cell3row8.innerHTML = converToBinary(fullDataArray[i][6]);
 
             table.appendChild(document.createElement("hr"));
-
-            console.log(fullDataArray);
         }
     }
 }
