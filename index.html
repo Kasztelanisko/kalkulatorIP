@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="script.js"></script>
+    <title>Kalkulator IP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Courier Prime', monospace;
+        }
+
+        input[type=text] {
+            width: 10%;
+        }
+
+        td {
+            padding-left: 10px;
+        }
+
+        .binary {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kalkulator IP</h1><br>
+    <form action="#">
+        <input type="text" id="ip"> Podaj IP<br>
+        <select id="mask">
+            <option value="8">/8 aka 255.0.0.0</option>
+            <option value="16">/16 aka 255.255.0.0</option>
+            <option value="24" selected>/24 aka 255.255.255.0</option>
+        </select> Wybierz maskę<br>
+        <input type="button" value="Wyślij" id="send">
+    </form>
+    <div id="content" style="display: none;">
+        <hr>
+        <table id="table">
+            <tr>
+                <th>&nbsp;</th>
+                <th><b>dziesiętnie</b></th>
+                <th><b>binarnie</b></th>
+            </tr>
+            <tr id="ipAddress">
+                <td>Adres IP</td>
+                <td id="ipAddressDecimal"></td>
+                <td id="ipAddressBinary" class="binary"></td>
+            </tr>
+            <tr id="maskTable">
+                <td>Maska</td>
+                <td id="maskTableDecimal"></td>
+                <td id="maskTableBinary" class="binary"></td>
+            </tr>
+            <tr id="webAddress">
+                <td>Adres sieci</td>
+                <td id="webAddressDecimal"></td>
+                <td id="webAddressBinary" class="binary"></td>
+                <td id="webAddressClass"></td>
+            </tr>
+            <tr id="broadcastAddress">
+                <td>Adres rozgłoszeniowy</td>
+                <td id="broadcastAddressDecimal"></td>
+                <td id="broadcastAddressBinary" class="binary"></td>
+            </tr>
+            <tr id="hostNumber">
+                <td>Hostów w sieci</td>
+                <td id="hostNumberDecimal"></td>
+                <td id="hostNumberBinary" class="binary"></td>
+            </tr>
+            <tr id="hostMin">
+                <td>Host min</td>
+                <td id="hostMinDecimal"></td>
+                <td id="hostMinBinary" class="binary"></td>
+            </tr>
+            <tr id="hostMax">
+                <td>Host max</td>
+                <td id="hostMaxDecimal"></td>
+                <td id="hostMaxBinary" class="binary"></td>
+            </tr>
+        </table>
+    </div>
+    <hr>
+    <button id="history">Historia obliczeń</button>
+    <button id="deleteHistory">Wyczyść historię</button><br>
+    <div id="historyContent" style="display: none;"></div>
+</body>
+</html>
