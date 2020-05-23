@@ -189,6 +189,7 @@ function createHistory () {
             let cell3row1 = row1.insertCell(2);
             cell1row1.innerHTML = "&nbsp;";
             cell2row1.innerHTML = "<b>dziesiętnie</b>";
+            cell3row1.setAttribute("class", "binary");
             cell3row1.innerHTML = "<b>binarnie</b>";
 
             let row2 = table.insertRow(1);
