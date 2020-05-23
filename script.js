@@ -59,7 +59,7 @@ function returnIpClass(ipAddress) {
     else if (ip[0] >= 128 && ip[0] <= 191) {
         return "B";
     }
-    else if (ipd[0] >= 192 && ip[0] <= 223) {
+    else if (ip[0] >= 192 && ip[0] <= 223) {
         return "C";
     }
     else if (ip[0] >= 224 && ip[0] <= 239) {
@@ -139,6 +139,127 @@ function calculateIp(data) {
     }
 }
 
+function createHistory () {
+    let cookies = decodeURIComponent(document.cookie);
+    if (cookies == "") {
+        alert("Brak historii do wyświetlenia.")
+    }
+    else {
+        document.getElementById("historyContent").innerHTML = "";
+        document.getElementById("historyContent").removeAttribute("style");
+        console.log("Wykryto ciastka. Analizowanie...");
+        cookies = cookies.split("; ");
+        console.log(cookies);
+
+        let ipArray = [];
+        let tempArray = [];
+
+        cookies.forEach(element => {
+            if (element.substring(0, 7) != "counter") {
+                tempArray.push(element.split("="));
+            }
+        });
+
+        tempArray.forEach(el => {
+            ipArray.push(el[1]);
+        });
+
+        console.log(ipArray);
+
+        // [ipAddress, fullMask, webAddress, broadcastAddress, hostNumber, hostMin, hostMax]
+        let fullDataArray = [];
+        ipArray.forEach(element => {
+            fullDataArray.push(calculateIp(element));
+        });
+
+        console.log(fullDataArray);
+
+        const historyContent = document.getElementById("historyContent");
+        historyContent.removeAttribute("style");
+        for (let i = 0; i < fullDataArray.length; i++) {
+            // const element = array[i];
+
+            const table = document.createElement("table");
+            table.setAttribute("id", "history" + i);
+            historyContent.appendChild(table);
+
+            let row1 = table.insertRow(0);
+            let cell1row1 = row1.insertCell(0);
+            let cell2row1 = row1.insertCell(1);
+            let cell3row1 = row1.insertCell(2);
+            cell1row1.innerHTML = "&nbsp;";
+            cell2row1.innerHTML = "<b>dziesiętnie</b>";
+            cell3row1.innerHTML = "<b>binarnie</b>";
+
+            let row2 = table.insertRow(1);
+            let cell1row2 = row2.insertCell(0);
+            let cell2row2 = row2.insertCell(1);
+            let cell3row2 = row2.insertCell(2);
+            cell1row2.innerHTML = "Adres IP";
+            cell2row2.innerHTML = fullDataArray[i][0];
+            cell3row2.setAttribute("class", "binary");
+            cell3row2.innerHTML = converToBinary(fullDataArray[i][0]);
+
+            let row3 = table.insertRow(2);
+            let cell1row3 = row3.insertCell(0);
+            let cell2row3 = row3.insertCell(1);
+            let cell3row3 = row3.insertCell(2);
+            cell1row3.innerHTML = "Maska";
+            cell2row3.innerHTML = fullDataArray[i][1] + " = " + returnShortMask(fullDataArray[i][1]);
+            cell3row3.setAttribute("class", "binary");
+            cell3row3.innerHTML = converToBinary(fullDataArray[i][1]);
+
+            let row4 = table.insertRow(3);
+            let cell1row4 = row4.insertCell(0);
+            let cell2row4 = row4.insertCell(1);
+            let cell3row4 = row4.insertCell(2);
+            let cell4row4 = row4.insertCell(3);
+            cell1row4.innerHTML = "Adres sieci";
+            cell2row4.innerHTML = fullDataArray[i][2];
+            cell3row4.setAttribute("class", "binary");
+            cell3row4.innerHTML = converToBinary(fullDataArray[i][2]);
+            cell4row4.innerHTML = "klasa " + returnIpClass(fullDataArray[i][2]);
+
+            let row5 = table.insertRow(4);
+            let cell1row5 = row5.insertCell(0);
+            let cell2row5 = row5.insertCell(1);
+            let cell3row5 = row5.insertCell(2);
+            cell1row5.innerHTML = "Adres rozgłoszeniowy";
+            cell2row5.innerHTML = fullDataArray[i][3];
+            cell3row5.setAttribute("class", "binary");
+            cell3row5.innerHTML = converToBinary(fullDataArray[i][3]);
+
+            let row6 = table.insertRow(5);
+            let cell1row6 = row6.insertCell(0);
+            let cell2row6 = row6.insertCell(1);
+            cell1row6.innerHTML = "Hostów w sieci";
+            cell2row6.innerHTML = fullDataArray[i][4];
+
+            let row7 = table.insertRow(6);
+            let cell1row7 = row7.insertCell(0);
+            let cell2row7 = row7.insertCell(1);
+            let cell3row7 = row7.insertCell(2);
+            cell1row7.innerHTML = "Host min";
+            cell2row7.innerHTML = fullDataArray[i][5];
+            cell3row7.setAttribute("class", "binary");
+            cell3row7.innerHTML = converToBinary(fullDataArray[i][5]);
+
+            let row8 = table.insertRow(7);
+            let cell1row8 = row8.insertCell(0);
+            let cell2row8 = row8.insertCell(1);
+            let cell3row8 = row8.insertCell(2);
+            cell1row8.innerHTML = "Host max";
+            cell2row8.innerHTML = fullDataArray[i][6];
+            cell3row8.setAttribute("class", "binary");
+            cell3row8.innerHTML = converToBinary(fullDataArray[i][6]);
+
+            table.appendChild(document.createElement("hr"));
+
+            console.log(fullDataArray);
+        }
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("send").addEventListener('click', function () {
         const table = document.getElementById("table").rows;
@@ -151,17 +272,17 @@ document.addEventListener("DOMContentLoaded", function () {
         else {
             document.getElementById("content").removeAttribute("style");
             for (let i = 0; i <= table.length - 2; i++) {
+                console.log(fullData[i]);
+                table[i + 1].cells[1].innerHTML = fullData[i];
+                table[i + 1].cells[2].innerHTML = converToBinary(fullData[i]);
                 if (i == 1) {
-                    table[i + 1].cells[1].innerHTML = fullData[i] + " = " + fullData[1];
-                }
-                else if (i != 4) {
-                    table[i + 1].cells[2].innerHTML = converToBinary(fullData[i]);
+                    table[i + 1].cells[1].innerHTML = fullData[i] + " = " + returnShortMask(fullData[i]);
                 }
                 else if (i == 2) {
                     table[i + 1].cells[3].innerHTML = "klasa " + returnIpClass(fullData[0]);
                 }
-                else {
-                    table[i + 1].cells[1].innerHTML = fullData[i];
+                else if (i == 4) {
+                    table[i + 1].cells[2].innerHTML = "";
                 }
             }
 
@@ -194,175 +315,30 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    document.getElementById("history").addEventListener('click', function () {
+    document.getElementById("history").addEventListener('click', createHistory);
+
+    document.getElementById("deleteHistory").addEventListener('click', function () {
         let cookies = decodeURIComponent(document.cookie);
-        if (cookies == "") {
-            alert("Brak historii do wyświetlenia.")
-        }
-        else {
-            document.getElementById("historyContent").innerHTML = "";
-            document.getElementById("historyContent").removeAttribute("style");
-            console.log("Wykryto ciastka. Analizowanie...");
-            cookies = cookies.split("; ");
-            console.log(cookies);
+        cookies = cookies.split("; ");
 
-            let ipArray = [];
-            let tempArray = [];
-
-            cookies.forEach(element => {
-                if (element.substring(0, 7) != "counter") {
-                    tempArray.push(element.split("="));
-                }
-            });
-
-            tempArray.forEach(el => {
-                ipArray.push(el[1]);
-            });
-
-            console.log(ipArray);
-
-            // [ipAddress, fullMask, webAddress, broadcastAddress, hostNumber, hostMin, hostMax]
-            let fullDataArray = [];
-            ipArray.forEach(element => {
-                fullDataArray.push(calculateIp(element));
-            });
-
-            console.log(fullDataArray);
-
-            const historyContent = document.getElementById("historyContent");
-            historyContent.removeAttribute("style");
-            for (let i = 0; i < fullDataArray.length; i++) {
-                // const element = array[i];
-
-                const table = document.createElement("table");
-                table.setAttribute("id", "history" + i);
-                historyContent.appendChild(table);
-
-                let row1 = table.insertRow(0);
-                let cell1row1 = row1.insertCell(0);
-                let cell2row1 = row1.insertCell(1);
-                let cell3row1 = row1.insertCell(2);
-                cell1row1.innerHTML = "&nbsp;";
-                cell2row1.innerHTML = "<b>dziesiętnie</b>";
-                cell3row1.innerHTML = "<b>binarnie</b>";
-
-                let row2 = table.insertRow(1);
-                let cell1row2 = row2.insertCell(0);
-                let cell2row2 = row2.insertCell(1);
-                let cell3row2 = row2.insertCell(2);
-                cell1row2.innerHTML = "Adres IP";
-                cell2row2.innerHTML = fullDataArray[i][0];
-                cell3row2.setAttribute("class", "binary");
-                cell3row2.innerHTML = converToBinary(fullDataArray[i][0]);
-
-                let row3 = table.insertRow(2);
-                let cell1row3 = row3.insertCell(0);
-                let cell2row3 = row3.insertCell(1);
-                let cell3row3 = row3.insertCell(2);
-                cell1row3.innerHTML = "Maska";
-                cell2row3.innerHTML = fullDataArray[i][1] + " = " + returnShortMask(fullDataArray[i][1]);
-                cell3row3.setAttribute("class", "binary");
-                cell3row3.innerHTML = converToBinary(fullDataArray[i][1]);
-
-                let row4 = table.insertRow(3);
-                let cell1row4 = row4.insertCell(0);
-                let cell2row4 = row4.insertCell(1);
-                let cell3row4 = row4.insertCell(2);
-                let cell4row4 = row4.insertCell(3);
-                cell1row4.innerHTML = "Adres sieci";
-                cell2row4.innerHTML = fullDataArray[i][2];
-                cell3row4.setAttribute("class", "binary");
-                cell3row4.innerHTML = converToBinary(fullDataArray[i][2]);
-                cell4row4.innerHTML = "klasa " + returnIpClass(fullDataArray[i][2]);
-
-                let row5 = table.insertRow(4);
-                let cell1row5 = row5.insertCell(0);
-                let cell2row5 = row5.insertCell(1);
-                let cell3row5 = row5.insertCell(2);
-                cell1row5.innerHTML = "Adres rozgłoszeniowy";
-                cell2row5.innerHTML = fullDataArray[i][3];
-                cell3row5.setAttribute("class", "binary");
-                cell3row5.innerHTML = converToBinary(fullDataArray[i][3]);
-
-                let row6 = table.insertRow(5);
-                let cell1row6 = row6.insertCell(0);
-                let cell2row6 = row6.insertCell(1);
-                cell1row6.innerHTML = "Hostów w sieci";
-                cell2row6.innerHTML = fullDataArray[i][4];
-
-                let row7 = table.insertRow(6);
-                let cell1row7 = row7.insertCell(0);
-                let cell2row7 = row7.insertCell(1);
-                let cell3row7 = row7.insertCell(2);
-                cell1row7.innerHTML = "Host min";
-                cell2row7.innerHTML = fullDataArray[i][5];
-                cell3row7.setAttribute("class", "binary");
-                cell3row7.innerHTML = converToBinary(fullDataArray[i][5]);
-
-                let row8 = table.insertRow(7);
-                let cell1row8 = row8.insertCell(0);
-                let cell2row8 = row8.insertCell(1);
-                let cell3row8 = row8.insertCell(2);
-                cell1row8.innerHTML = "Host max";
-                cell2row8.innerHTML = fullDataArray[i][6];
-                cell3row8.setAttribute("class", "binary");
-                cell3row8.innerHTML = converToBinary(fullDataArray[i][6]);
-
-                table.appendChild(document.createElement("hr"));
-
-                console.log(fullDataArray);
-                
-                // for (let j = 0; j <= tableRows.length - 1; j++) {
-                //     console.log(fullDataArray[j]);
-                //     for (let k = 0; k <= tableRows.length - 1; k++) {
-                //         console.log(j);
-                //         console.log(fullDataArray[j][k]);
-                //         tableRows[j + 1].cells[1].innerHTML = fullDataArray[j][k];
-                //         tableRows[j + 1].cells[2].innerHTML = converToBinary(fullDataArray[j][k]);
-                //         if (k == 1) {
-                //             tableRows[j + 1].cells[1].innerHTML = fullDataArray[j][1] + " = " + returnShortMask(fullDataArray[j][1]);
-                //             console.log("j == 1")
-                //         }
-                //         else if (k == 2) {
-                //             tableRows[j + 1].cells[3].innerHTML = "klasa " + returnIpClass(fullDataArray[j][0]);
-                //             console.log("j == 2")
-                //         }
-                //         else if (k == 5) {
-                //             tableRows[j + 1].cells[2].innerHTML = converToBinary(fullDataArray[j][k]);
-                //             console.log("j == 5")
-                //         }
-                //         console.log("--Nowa iteracja--")
-                //         // else {
-                //         //     console.log("j")
-                //         //     tableRows[i + 1].cells[1].innerHTML = fullDataArray[i][j];
-                //         //     tableRows[i + 1].cells[2].innerHTML = converToBinary(fullDataArray[i][j]);
-                //         // }
-                //     }
-                // }
+        let counter;
+        for (let i = 0; i < cookies.length; i++) {
+            if (cookies[i].substring(0, 7) == "counter") {
+                counter = parseInt(cookies[i].substring(8)) + 1;
             }
         }
-    });
 
-document.getElementById("deleteHistory").addEventListener('click', function () {
-    let cookies = decodeURIComponent(document.cookie);
-    cookies = cookies.split("; ");
+        console.log("------------");
+        console.log("Counter: " + counter);
 
-    let counter;
-    for (let i = 0; i < cookies.length; i++) {
-        if (cookies[i].substring(0, 7) == "counter") {
-            counter = parseInt(cookies[i].substring(8)) + 1;
+        for (let j = 1; j < counter; j++) {
+            console.log("Usuwanie ciastka nr." + j);
+            document.cookie = "ipaddress" + j + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+            console.log("Usunięto ciastko nr." + j);
         }
-    }
+        document.cookie = "counter=; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
 
-    console.log("------------");
-    console.log("Counter: " + counter);
-
-    for (let j = 1; j < counter; j++) {
-        console.log("Usuwanie ciastka nr." + j);
-        document.cookie = "ipaddress" + j + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-        console.log("Usunięto ciastko nr." + j);
-    }
-    document.cookie = "counter=; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-    alert("Historia obliczeń została wyczyszczona.");
-});
+        document.getElementById("historyContent").innerHTML = "";
+        alert("Historia obliczeń została wyczyszczona.");
+    });
 });
