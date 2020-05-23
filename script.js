@@ -85,6 +85,8 @@ function returnShortMask(mask) {
     }
 }
 
+// Glowna funkcja programu obliczajaca dane z adresu ip
+// Mozna to bylo zrobic lepiej ale dziala
 function calculateIp(data) {
     let dataSplitted = data.split("/");
     const ipAddress = dataSplitted[0];
@@ -140,6 +142,8 @@ function calculateIp(data) {
     }
 }
 
+// Sprawdzenie ciastek i stworzenie dla kazdego z nich tabeli 
+// i wepchniece tam danych.
 function createHistory () {
     let cookies = decodeURIComponent(document.cookie);
     if (cookies == "") {
