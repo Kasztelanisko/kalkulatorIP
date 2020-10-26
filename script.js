@@ -1,4 +1,5 @@
-function converToBinary(data) {
+// konwertowanie ip z normalnego ip np. (192.168.1.1) do postaci binarnej (11000000.10101000.00000001.00000001)
+function convertToBinary(data) {
     // Jesli data jest adresem ip podziel je i konwertuj
     if (verifyIpAddress(data)) {
         const array = data.split(".");
@@ -11,7 +12,6 @@ function converToBinary(data) {
                 else binary = "1" + binary;
                 number = Math.floor(number / 2);
             }
-
             while (binary.length < 8) {
                 binary = "0" + binary;
             }
@@ -19,17 +19,15 @@ function converToBinary(data) {
         });
         return converted.slice(0, -1);
     }
-    // Jesli data jest liczbą to ja konwertuj
+    // Jesli data jest liczba to ja konwertuj
     else if (typeof data == "number") {
         let binary = "";
-
         while (data > 0) {
             if (data % 2 == 0) binary = "0" + binary;
             else if (data == 0) binary = "0" + binary;
             else binary = "1" + binary;
             data = Math.floor(data / 2);
         }
-
         while (binary.length < 8) {
             binary = "0" + binary;
         }
@@ -37,6 +35,33 @@ function converToBinary(data) {
     }
 }
 
+// konwertowanie ip z postaci binarnej np. (11000000.10101000.00000001.00000001) do normalnego ip (192.168.1.1)
+function convertToIP(data) {
+    let result = "";
+
+    const array = data.split(".");
+    for (let i = 0; i <= 3; i++) {
+        let bits = Array.from(array[i]);
+        let bitsReverse = bits.reverse();
+
+        let value = 1, calc = 0;
+        for (let j = 0; j <= 7; j++) {
+            if (bitsReverse[j] == 1) {
+                calc += value;
+            }
+            value = value*2;
+        }
+        if (i != 3) {
+            calc+=".";
+        }
+
+        result+=calc;
+
+    }
+    return result;
+}
+
+// Funkcja zwraca date rok do przodu
 function returnDateYearAhead() {
     let date = new Date();
     date.setFullYear(date.getFullYear() + 1);
@@ -49,7 +74,7 @@ function verifyIpAddress(ip) {
     return new RegExp("^[0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}$").test(ip);
 }
 
-// Sprawdzenie i zwrocenie klasy adresu ip
+// Sprawdzenie i zwrocenie klasy adresu ip w postaci stringa np. "A"
 function returnIpClass(ipAddress) {
     let ip = ipAddress.split(".");
 
@@ -72,78 +97,202 @@ function returnIpClass(ipAddress) {
 
 // Zwrocenie maski w postaci np. 24
 function returnShortMask(mask) {
-    switch (mask) {
-        case "255.0.0.0":
-            return "8";
-            break;
-        case "255.255.0.0":
-            return "16";
-            break;
-        case "255.255.255.0":
-            return "24";
-            break;
+    let result = 0;
+
+    const array = convertToBinary(mask).split(".");
+    for (let i = 0; i <= 3; i++) {
+        let bits = Array.from(array[i]);
+        let bitsReverse = bits.reverse();
+        let sum = 0;
+
+        for (let j = 0; j <= 7; j++) {
+            if (bitsReverse[j] == 1) {
+                sum++;
+            }
+        }
+        result+=parseInt(sum);
     }
+    return result;
+}
+
+// Zwrocenie maski w postaci np. 11111111.11111111.11111111.00000000
+function returnBinaryMask (maskShort) {
+    let maskBinary = "";
+
+    for (let i = 1; i<=32; i++) {
+        if (maskShort >= i) {
+            maskBinary+="1";
+        }
+        else {
+            maskBinary+="0";
+        }
+        if (i == 8 || i == 16 || i == 24) {
+            maskBinary+=".";
+        }
+    }
+    return maskBinary;
+}
+
+// Zwrocenie maski w postaci np. 255.255.255.0
+function returnFullMask(maskShort) {
+    let maskBinary = "";
+
+    for (let i = 1; i<=32; i++) {
+        if (maskShort >= i) {
+            maskBinary+="1";
+        }
+        else {
+            maskBinary+="0";
+        }
+        if (i == 8 || i == 16 || i == 24) {
+            maskBinary+=".";
+        }
+    }
+
+    let array = maskBinary.split(".");
+    let result = "";
+
+    for (let i = 0; i <= 3; i++) {
+        let bits = Array.from(array[i]);
+        let bitsReverse = bits.reverse();
+
+        let value = 1, calc = 0;
+        for (let j = 0; j <= 7; j++) {
+            if (bitsReverse[j] == 1) {
+                calc += value;
+            }
+            value = value*2;
+        }
+        if (i != 3) {
+            calc+=".";
+        }
+
+        result += calc;
+    }
+
+    return result;
+}
+
+// Zwrocenie adresu sieci w postaci binarnej np. 11000000.10101000.00000000.00000000
+function returnWebAddressBinary(ipAddress, mask) {
+    let ipAddressBinary = convertToBinary(ipAddress);
+    let maskBinary = returnBinaryMask(mask);
+    let result = "";
+
+    for (let i = 0; i<=maskBinary.length-1; i++) {
+        if (ipAddressBinary[i] == maskBinary[i]) {
+            result+=ipAddressBinary[i];
+        }
+        else result+="0";
+    }
+    return result;
+}
+
+// Zwrocenie adresu sieci w postaci np. 192.168.1.1
+function returnWebAddress(ipAddress, mask) {
+    return convertToIP(returnWebAddressBinary(ipAddress, mask));
+}
+
+// Zwrocenie adresu rozgłoszeniowego w postaci np. 192.168.1.255
+function returnBroadcastAddress(ipAddress, mask) {
+    let webAddress = returnWebAddressBinary(ipAddress, mask).split(".").join("");
+    let maskToSubtract = 32 - parseInt(mask);
+
+    let webAddressEdit = webAddress.substring(0, (webAddress.length - maskToSubtract));
+    for (let i = 0; i < maskToSubtract; i++) {
+        webAddressEdit+="1";
+    }
+
+    let webAddressFinal = "";
+
+    let c = 8;
+    for (let i = 0; i < 4; i++) {
+        if (i == 0) {
+            webAddressFinal+= webAddressEdit.substring(0,8);
+        }
+        else {
+            webAddressFinal+= webAddressEdit.substring(c,(c+8));
+            c = parseInt(c)+8;;
+        }
+        
+        if (i != 3) {
+            webAddressFinal += ".";
+        }
+    }
+    return convertToIP(webAddressFinal);
+}
+// Zwrocenie adresu hosta minimalnego albo maksymalnego (w zaleznosci) w postaci np. 192.168.1.255
+function returnhostMinOrMaxAddress(ipAddress, mask, minOrMax) {
+    let host = returnWebAddressBinary(ipAddress, mask).split(".").join("");
+    let maskToSubtract = 32 - parseInt(mask);
+
+    let hostEdit = host.substring(0, (host.length - maskToSubtract));
+    for (let i = 0; i < maskToSubtract; i++) {
+        if (minOrMax == "Min") {
+            if (i == maskToSubtract - 1) {
+                hostEdit += "1";
+            }
+            else {
+                hostEdit += "0";
+            }
+        }
+        else if (minOrMax == "Max") {
+            if (i == maskToSubtract - 1) {
+                hostEdit += "0";
+            }
+            else {
+                hostEdit += "1";
+            }
+        }
+    }
+    let hostFinal = "";
+
+    let c = 8;
+    for (let i = 0; i < 4; i++) {
+        if (i == 0) {
+            hostFinal+= hostEdit.substring(0,8);
+        }
+        else {
+            hostFinal+= hostEdit.substring(c,(c+8));
+            c = parseInt(c)+8;
+        }
+        
+        if (i != 3) {
+            hostFinal += ".";
+        }
+    }
+    return convertToIP(hostFinal);
 }
 
 // Glowna funkcja programu obliczajaca dane z adresu ip
-// Mozna to bylo zrobic lepiej ale dziala
 function calculateIp(data) {
-    let dataSplitted = data.split("/");
+    const dataSplitted = data.split("/");
     const ipAddress = dataSplitted[0];
-    let maskAddress = dataSplitted[1];
+    const maskAddress = dataSplitted[1];
+    const ipSplitted = ipAddress.split(".");
 
-    switch (maskAddress) {
-        case "255.0.0.0":
-            maskAddress = "8";
-            break;
-        case "255.255.0.0":
-            maskAddress = "16";
-            break;
-        case "255.255.255.0":
-            maskAddress = "24";
-            break;
-    }
-
-    if (!verifyIpAddress(ipAddress)) {
+    if (!verifyIpAddress(ipAddress) || ipSplitted[0] > 255 || ipSplitted[1] > 255 || ipSplitted[2] > 255 || ipSplitted[3] > 255) {
         return false;
     }
     else {
-        const ipSplited = ipAddress.split(".");
-
         // Uzyskiwanie przygotowanych danych do wyswietlenia
         let fullMask, webAddress, broadcastAddress, hostMin, hostMax;
-        switch (maskAddress) {
-            case "8":
-                fullMask = "255.0.0.0";
-                webAddress = ipSplited[0] + ".0.0.0"
-                broadcastAddress = ipSplited[0] + ".255.255.255";
-                hostMin = ipSplited[0] + ".0.0.1";
-                hostMax = ipSplited[0] + ".255.255.254";
-                break;
-            case "16":
-                fullMask = "255.255.0.0";
-                webAddress = ipSplited[0] + "." + ipSplited[1] + ".0.0";
-                broadcastAddress = ipSplited[0] + "." + ipSplited[1] + ".255.255";
-                hostMin = ipSplited[0] + "." + ipSplited[1] + ".0.1";
-                hostMax = ipSplited[0] + "." + ipSplited[1] + ".255.254";
-                break;
-            case "24":
-                fullMask = "255.255.255.0";
-                webAddress = ipSplited[0] + "." + ipSplited[1] + "." + ipSplited[2] + ".0";
-                broadcastAddress = ipSplited[0] + "." + ipSplited[1] + "." + ipSplited[2] + ".255";
-                hostMin = ipSplited[0] + "." + ipSplited[1] + "." + ipSplited[2] + ".1";
-                hostMax = ipSplited[0] + "." + ipSplited[1] + "." + ipSplited[2] + ".254";
-                break;
-        }
+
+        fullMask = returnFullMask(maskAddress);
+        webAddress = returnWebAddress(ipAddress, maskAddress);
+        broadcastAddress = returnBroadcastAddress(ipAddress, maskAddress);
+        hostMin = returnhostMinOrMaxAddress(ipAddress, maskAddress, "Min");
+        hostMax = returnhostMinOrMaxAddress(ipAddress, maskAddress, "Max");
+
         const fullData = [ipAddress, fullMask, webAddress, broadcastAddress, Math.pow(2, (32 - maskAddress)) - 2, hostMin, hostMax];
-        console.log(fullData);
+        console.log("Full data: "+fullData);
 
         return fullData;
     }
 }
 
 // Sprawdzenie ciastek i stworzenie dla kazdego z nich tabeli 
-// i wepchniece tam danych.
+// i wepchniecie tam danych.
 function createHistory () {
     let cookies = decodeURIComponent(document.cookie);
     if (cookies == "") {
@@ -207,7 +356,7 @@ function createHistory () {
             cell1row2.innerHTML = "Adres IP";
             cell2row2.innerHTML = fullDataArray[i][0];
             cell3row2.setAttribute("class", "binary");
-            cell3row2.innerHTML = converToBinary(fullDataArray[i][0]);
+            cell3row2.innerHTML = convertToBinary(fullDataArray[i][0]);
 
             let row3 = table.insertRow(2);
             let cell1row3 = row3.insertCell(0);
@@ -216,7 +365,7 @@ function createHistory () {
             cell1row3.innerHTML = "Maska";
             cell2row3.innerHTML = fullDataArray[i][1] + " = " + returnShortMask(fullDataArray[i][1]);
             cell3row3.setAttribute("class", "binary");
-            cell3row3.innerHTML = converToBinary(fullDataArray[i][1]);
+            cell3row3.innerHTML = convertToBinary(fullDataArray[i][1]);
 
             let row4 = table.insertRow(3);
             let cell1row4 = row4.insertCell(0);
@@ -226,8 +375,8 @@ function createHistory () {
             cell1row4.innerHTML = "Adres sieci";
             cell2row4.innerHTML = fullDataArray[i][2];
             cell3row4.setAttribute("class", "binary");
-            cell3row4.innerHTML = converToBinary(fullDataArray[i][2]);
-            cell4row4.innerHTML = "klasa " + returnIpClass(fullDataArray[i][2]);
+            cell3row4.innerHTML = convertToBinary(fullDataArray[i][2]);
+            cell4row4.innerHTML = "kl. " + returnIpClass(fullDataArray[i][2]);
 
             let row5 = table.insertRow(4);
             let cell1row5 = row5.insertCell(0);
@@ -236,7 +385,7 @@ function createHistory () {
             cell1row5.innerHTML = "Adres rozgłoszeniowy";
             cell2row5.innerHTML = fullDataArray[i][3];
             cell3row5.setAttribute("class", "binary");
-            cell3row5.innerHTML = converToBinary(fullDataArray[i][3]);
+            cell3row5.innerHTML = convertToBinary(fullDataArray[i][3]);
 
             let row6 = table.insertRow(5);
             let cell1row6 = row6.insertCell(0);
@@ -251,7 +400,7 @@ function createHistory () {
             cell1row7.innerHTML = "Host min";
             cell2row7.innerHTML = fullDataArray[i][5];
             cell3row7.setAttribute("class", "binary");
-            cell3row7.innerHTML = converToBinary(fullDataArray[i][5]);
+            cell3row7.innerHTML = convertToBinary(fullDataArray[i][5]);
 
             let row8 = table.insertRow(7);
             let cell1row8 = row8.insertCell(0);
@@ -260,7 +409,7 @@ function createHistory () {
             cell1row8.innerHTML = "Host max";
             cell2row8.innerHTML = fullDataArray[i][6];
             cell3row8.setAttribute("class", "binary");
-            cell3row8.innerHTML = converToBinary(fullDataArray[i][6]);
+            cell3row8.innerHTML = convertToBinary(fullDataArray[i][6]);
 
             table.appendChild(document.createElement("hr"));
         }
@@ -279,9 +428,8 @@ document.addEventListener("DOMContentLoaded", function () {
         else {
             document.getElementById("content").removeAttribute("style");
             for (let i = 0; i <= table.length - 2; i++) {
-                console.log(fullData[i]);
                 table[i + 1].cells[1].innerHTML = fullData[i];
-                table[i + 1].cells[2].innerHTML = converToBinary(fullData[i]);
+                table[i + 1].cells[2].innerHTML = convertToBinary(fullData[i]);
                 if (i == 1) {
                     table[i + 1].cells[1].innerHTML = fullData[i] + " = " + returnShortMask(fullData[i]);
                 }
@@ -320,6 +468,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log("Ciastka po dodaniu nowych: " + decodeURIComponent(document.cookie));
             }
         }
+    });
+
+    document.getElementById("clear").addEventListener('click', function () {
+        document.getElementById("content").setAttribute("style", "display: none;");
     });
 
     document.getElementById("history").addEventListener('click', createHistory);
