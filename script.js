@@ -471,7 +471,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.getElementById("clear").addEventListener('click', function () {
-        document.getElementById("content").setAttribute("style", "display: none;");
+        document.getElementById("historyContent").setAttribute("style", "display: none;");
     });
 
     document.getElementById("history").addEventListener('click', createHistory);
